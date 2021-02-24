@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css"/>
+    <script src="https://www.layuicdn.com/layui/layui.js"></script>
+</head>
+<body>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">URL：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="url" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">UA：</label>
+        <div class="layui-input-block">
+            <input type="text" name="userAgent" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">Cookie：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="cookie" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">Referer：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="referer" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">Body：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="body" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" pane>
+        <label class="layui-form-label">Method：</label>
+        <div class="layui-input-block">
+            <input type="radio" name="method" value="GET" title="GET" checked>
+            <input type="radio" name="method" value="POST" title="POST">
+        </div>
+    </div>
+    <div class="layui-form-item" pane>
+        <label class="layui-form-label">Redirect：</label>
+        <div class="layui-input-block">
+            <input type="radio" name="redirect" value="true" title="true" checked>
+            <input type="radio" name="redirect" value="false" title="false">
+        </div>
+    </div>
+    <div class="layui-form-item" pane>
+        <label class="layui-form-label">Timeout：</label>
+        <div class="layui-input-block">
+            <select id="timeout" name="timeout">
+                <option value=""></option>
+                <option value="1000">1s</option>
+                <option value="2000">2s</option>
+                <option value="3000">3s</option>
+                <option value="4000">4s</option>
+                <option value="5000">5s</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block" style="margin-left: 15%">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">提交</button>
+            <button id="reset" type="reset" class="layui-btn layui-btn-primary">重置</button>
+            <button id="export" type="button" class="layui-btn layui-btn-warm">导出</button>
+            <button id="import" type="button" class="layui-btn layui-btn-normal">导入</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use('form', function () {
+        var form = layui.form;
+        var $ = layui.$;
+
+        if (fy_bridge_app.getVar('formDataJson') != '') {
+            setValue(fy_bridge_app.getVar('formDataJson'));
+        }
+
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            var content = JSON.stringify(data.field);
+            fy_bridge_app.putVar('formDataJson', content);
+            layer.msg('提交成功');
+            fy_bridge_app.refreshPage(true);
+            return false;
+        });
+
+        //监听点击
+        $("#reset").click(function () {
+            window.location.reload();
+            fy_bridge_app.putVar('formDataJson', '');
+            fy_bridge_app.refreshPage(true);
+        });
+
+        $("#export").click(function () {
+            let formDataJson = fy_bridge_app.getVar('formDataJson');
+            if (formDataJson == '') {
+                formDataJson = '请先提交参数';
+            }
+            layer.open({
+                title: '请手动复制参数JSON',
+                content: formDataJson
+            });
+        });
+
+        $("#import").click(function () {
+            layer.open({
+                id: 1,
+                type: 1,
+                title: '请填写参数JSON',
+                skin: 'layui-layer-rim',
+                area: ['300px', 'auto'],
+                content: ' <div class="row" style="width: 100%;">'
+                    + '<div class="input-group">'
+                    + '<textarea id="jsonString" class="layui-textarea"></textarea>'
+                    + '</div>'
+                    + '</div>',
+                btn: ['提交', '取消'],
+                btn1: function (index, layero) {
+                    fy_bridge_app.putVar('formDataJson', layero.find("#jsonString").val());
+                    setValue(layero.find("#jsonString").val());
+
+                    layer.msg('提交成功');
+                    layer.close(index);
+                    fy_bridge_app.refreshPage(true);
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        });
+        function setValue(jsonString) {
+            let json = JSON.parse(jsonString);
+            $('[name="url"]').val(json.url);
+            $('[name="userAgent"]').val(json.userAgent);
+            $('[name="cookie"]').val(json.cookie);
+            $('[name="referer"]').val(json.referer);
+            $('[name="body"]').val(json.body);
+            if (json.method == 'GET') {
+                $("input[name='method'][value=GET]").prop("checked",true);
+            } else {
+                console.log(json.method);
+                $("input[name='method'][value=POST]").prop("checked",true);
+            }
+            if (json.redirect == 'true') {
+                $("input[name='redirect'][value=true]").prop("checked",true);
+            } else {
+                $("input[name='redirect'][value=false]").prop("checked",true);
+            }
+            if (json.timeout == '1000') {
+                $('#timeout').val(1000);
+            } else if (json.timeout == '2000') {
+                $('#timeout').val(2000);
+            } else if (json.timeout == '3000') {
+                $('#timeout').val(3000);
+                console.log($('#timeout').val())
+            } else if (json.timeout == '4000') {
+                $('#timeout').val(4000);
+            } else if (json.timeout == '5000') {
+                $('#timeout').val(5000);
+            }
+            layui.form.render("radio");
+            layui.form.render("select");
+        }
+    });
+</script>
+</body>
+</html>
