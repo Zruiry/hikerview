@@ -94,7 +94,7 @@
             msgHide("格式有误", "red", url);
             return;
         }
-        let jiexiTXT = request("hiker://files/jiexi.txt", {});
+        let jiexiTXT = request("hiker://files/jiexi/jiexi.txt", {});
         if (url.includes("@@")) {
             if (url.split("@@")[0].trim() != "删除" && url.split("@@")[0].trim() != "置顶") {
                 msgHide("这是啥操作", "red", url);
@@ -110,12 +110,12 @@
             }
             let reg = new RegExp(url.split("@@")[1] + "&&.*");
             if (url.includes("删除@@")) {
-                fy_bridge_app.writeFile("hiker://files/jiexi.txt", jiexiTXT.replace(reg, "").trim().replace("\n\n", "\n"));
+                fy_bridge_app.writeFile("hiker://files/jiexi/jiexi.txt", jiexiTXT.replace(reg, "").trim().replace("\n\n", "\n"));
                 msgHide("已删除", "green", url);
             }
             if (url.includes("置顶@@")) {
                 let jiexi = jiexiTXT.match(reg);
-                fy_bridge_app.writeFile("hiker://files/jiexi.txt", jiexi + "\n" + jiexiTXT.replace(reg, "").trim().replace("\n\n", "\n"));
+                fy_bridge_app.writeFile("hiker://files/jiexi/jiexi.txt", jiexi + "\n" + jiexiTXT.replace(reg, "").trim().replace("\n\n", "\n"));
                 msgHide("已置顶", "green", url);
             }
             return;
@@ -131,10 +131,10 @@
         }
         let reg = new RegExp(url.split("&&")[0] + "&&.*");
         if (reg.test(jiexiTXT)) {
-            fy_bridge_app.writeFile("hiker://files/jiexi.txt", jiexiTXT.replace(reg, url));
+            fy_bridge_app.writeFile("hiker://files/jiexi/jiexi.txt", jiexiTXT.replace(reg, url));
             msgHide("已修改", "green", url);
         } else {
-            fy_bridge_app.writeFile("hiker://files/jiexi.txt", jiexiTXT + "\n" + url);
+            fy_bridge_app.writeFile("hiker://files/jiexi/jiexi.txt", jiexiTXT + "\n" + url);
             msgHide("已添加", "green", url);
         }
     }
